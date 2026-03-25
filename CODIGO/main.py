@@ -238,75 +238,145 @@ def main():
         imprimir_resumen(res)
 
     # ---------------------------------------------
-    # Figura 1: primeras muestras (3 filas x 2 columnas)
+    # Configuración de estilo para paper académico
     # ---------------------------------------------
-    fig1, axes = plt.subplots(3, 2, figsize=(14, 15),
-                              gridspec_kw={'width_ratios': [3, 2]})
+    plt.rcParams.update({
+        'font.size': 9,
+        'axes.labelsize': 9,
+        'axes.titlesize': 10,
+        'xtick.labelsize': 8,
+        'ytick.labelsize': 8,
+        'legend.fontsize': 8,
+        'figure.titlesize': 11,
+        'font.family': 'serif',
+        'font.serif': ['Times New Roman', 'DejaVu Serif'],
+        'axes.linewidth': 0.8,
+        'grid.linewidth': 0.5,
+        'lines.linewidth': 1.5,
+    })
 
+    # ---------------------------------------------
+    # Figura 1: Distribuciones y primeros IC (layout compacto)
+    # ---------------------------------------------
+    fig1 = plt.figure(figsize=(7.5, 4.2))
+    gs = fig1.add_gridspec(2, 3, hspace=0.35, wspace=0.35,
+                           height_ratios=[2, 0.9])
+
+    # Fila superior: histogramas con distribuciones
     for i, res in enumerate(resultados_todos):
-        ax_hist = axes[i, 0]
-        ax_ic = axes[i, 1]
-
-        # Panel distribución
-        ax_hist.hist(
-            res["muestra0"], bins=15, density=True,
-            alpha=0.6, edgecolor='black', label='Histograma'
-        )
+        ax = fig1.add_subplot(gs[0, i])
+        
+        # Histograma
+        ax.hist(res["muestra0"], bins=15, density=True,
+                alpha=0.5, edgecolor='black', linewidth=0.5, 
+                color='lightgray')
 
         x = res["x_pdf"]
-        ax_hist.plot(x, res["pdf_teorica"](x), linewidth=2, label=res["label_teorica"])
-        ax_hist.plot(x, res["pdf_ajustada"](x), linestyle='--', linewidth=2,
-                     label=res["label_ajustada"])
-        ax_hist.axvline(res["media0"], linestyle=':', linewidth=2,
-                        label=f"Media = {res['media0']:.2f}")
+        ax.plot(x, res["pdf_teorica"](x), 'k-', linewidth=1.5)
+        ax.plot(x, res["pdf_ajustada"](x), 'k--', linewidth=1.5)
 
-        ax_hist.set_title(f"{res['nombre']}: distribución de la primera muestra")
-        ax_hist.set_xlabel("Valores de X")
-        ax_hist.set_ylabel("Densidad")
-        ax_hist.grid(alpha=0.3)
-        ax_hist.legend()
+        ax.set_title(res['nombre'], fontweight='bold', pad=6)
+        ax.set_xlabel('$x$')
+        if i == 0:
+            ax.set_ylabel('Densidad')
+        ax.grid(alpha=0.25, linewidth=0.5)
+        
+    # Fila inferior: intervalos de confianza iniciales
+    for i, res in enumerate(resultados_todos):
+        ax = fig1.add_subplot(gs[1, i])
+        
+        # IC con error bars más elegante
+        mid_point = (res["LI0"] + res["LS0"]) / 2
+        error = res["LS0"] - mid_point
+        
+        ax.errorbar([mid_point], [0.5], xerr=[[error]], 
+                   fmt='o', color='black', elinewidth=2, 
+                   capsize=5, capthick=2, markersize=4)
+        
+        ax.axvline(res["real_var"], color='red', linestyle='--', 
+                  linewidth=1.5)
+        
+        # Añadir etiqueta de varianza real solo en el centro
+       
+        
+        ax.set_ylim(0, 1)
+        ax.set_yticks([])
+        ax.set_xlabel('Varianza')
+        ax.grid(axis='x', alpha=0.25, linewidth=0.5)
+        
 
-        # Panel IC de la primera muestra
-        ax_ic.hlines(y=1, xmin=res["LI0"], xmax=res["LS0"], linewidth=4,
-                     label='IC 95% para la varianza')
-        ax_ic.plot([res["LI0"], res["LS0"]], [1, 1], 'o')
-        ax_ic.axvline(res["real_var"], linestyle='--', linewidth=2,
-                      label='Varianza real')
+    # Leyenda común para toda la figura 1
+    from matplotlib.lines import Line2D
+    legend_elements_fig1 = [
+        Line2D([0], [0], color='lightgray', linewidth=6, label='Muestra'),
+        Line2D([0], [0], color='k', linestyle='-', linewidth=1.5, label='Teórica'),
+        Line2D([0], [0], color='k', linestyle='--', linewidth=1.5, label='Ajustada'),
+    ]
+    fig1.legend(handles=legend_elements_fig1, loc='upper center', 
+               bbox_to_anchor=(0.5, 0.0), ncol=3, frameon=False, fontsize=8)
 
-        ax_ic.set_yticks([])
-        ax_ic.set_xlabel("Valor de la varianza")
-        ax_ic.set_title(f"{res['nombre']}: IC de la primera muestra")
-        ax_ic.grid(True, axis='x', alpha=0.3)
-        ax_ic.legend()
-
-    plt.tight_layout()
-    plt.show()
+    plt.savefig('INFORME/Imagenes/figura1_distribuciones.pdf', 
+                dpi=300, bbox_inches='tight', pad_inches=0.05)
+    plt.savefig('INFORME/Imagenes/figura1_distribuciones.png', 
+                dpi=300, bbox_inches='tight', pad_inches=0.05)
+    
+    plt.close(fig1)  # Cerrar figura 1 para liberar memoria
 
     # ---------------------------------------------
-    # Figura 2: 100 primeros intervalos en 3 subgráficos
+    # Figura 2: Intervalos de confianza (layout horizontal compacto)
     # ---------------------------------------------
-    fig2, axes2 = plt.subplots(3, 1, figsize=(11, 14), sharex=False)
+    fig2, axes2 = plt.subplots(1, 3, figsize=(7.5, 2.3), sharey=True)
 
     for ax, res in zip(axes2, resultados_todos):
-        primeros_100 = res["resultados"][:N_PLOT]
-        primeros_100_ordenados = sorted(primeros_100, key=lambda r: r["mid"])
+        primeros = res["resultados"][:N_PLOT]
+        primeros_ordenados = sorted(primeros, key=lambda r: r["mid"])
 
-        for j, r in enumerate(primeros_100_ordenados, start=1):
-            color = 'tab:blue' if r["contiene"] else 'tab:red'
-            ax.hlines(y=j, xmin=r["LI"], xmax=r["LS"], linewidth=2, color=color)
-            ax.plot([r["LI"], r["LS"]], [j, j], 'o', color=color, markersize=4)
+        # Contar cobertura
+        n_cubren = sum(1 for r in primeros if r["contiene"])
+        prop_cobertura = n_cubren / len(primeros)
 
-        ax.axvline(res["real_var"], color='black', linestyle='--', linewidth=2,
-                   label=f"Varianza real = {res['real_var']:.3f}")
+        for j, r in enumerate(primeros_ordenados, start=1):
+            color = '#2E86AB' if r["contiene"] else '#A23B72'
+            alpha = 0.6 if r["contiene"] else 0.8
+            ax.hlines(y=j, xmin=r["LI"], xmax=r["LS"], 
+                     linewidth=0.8, color=color, alpha=alpha)
 
-        ax.set_title(f"{res['nombre']}: primeros 100 intervalos de confianza")
-        ax.set_ylabel("Intervalos ordenados")
-        ax.grid(axis='x', alpha=0.3)
-        ax.legend()
+        ax.axvline(res["real_var"], color='black', linestyle='--', 
+                  linewidth=1.5, zorder=10)
 
-    axes2[-1].set_xlabel("Valor del intervalo para la varianza")
+        ax.set_title(res['nombre'], fontweight='bold', pad=6)
+        ax.set_xlabel('Varianza')
+        ax.grid(axis='x', alpha=0.25, linewidth=0.5)
+        ax.set_ylim(0, N_PLOT + 1)
+        
+        # Texto con estadísticas - más compacto
+        ax.text(0.98, 0.98, 
+               f'{prop_cobertura:.1%}',
+               transform=ax.transAxes, fontsize=8, fontweight='bold',
+               verticalalignment='top', horizontalalignment='right',
+               bbox=dict(boxstyle='round,pad=0.3', 
+                        facecolor='white', edgecolor='gray', 
+                        linewidth=0.5, alpha=0.85))
+
+    axes2[0].set_ylabel('Índice de intervalo')
+    
+    # Leyenda común más compacta
+    from matplotlib.lines import Line2D
+    legend_elements = [
+        Line2D([0], [0], color='#2E86AB', linewidth=2, label='Cubre $\\sigma^2$'),
+        Line2D([0], [0], color='#A23B72', linewidth=2, label='No cubre'),
+        Line2D([0], [0], color='black', linestyle='--', linewidth=1.5, 
+               label='$\\sigma^2$ real')
+    ]
+    fig2.legend(handles=legend_elements, loc='upper center', 
+               bbox_to_anchor=(0.5, -0.02), ncol=3, frameon=False, fontsize=8)
+
     plt.tight_layout()
-    plt.show()
+    plt.savefig('INFORME/Imagenes/figura2_intervalos.pdf', 
+                dpi=300, bbox_inches='tight', pad_inches=0.05)
+    plt.savefig('INFORME/Imagenes/figura2_intervalos.png', 
+                dpi=300, bbox_inches='tight', pad_inches=0.05)
+    plt.close(fig2)  # Cerrar figura 2 para liberar memoria
 
 
 # =====================================================
