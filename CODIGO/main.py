@@ -256,19 +256,14 @@ def main():
     })
 
     # ---------------------------------------------
-    # Figura 1: Distribuciones y primeros IC (layout compacto)
+    # Figura 1: Distribuciones (solo histogramas)
     # ---------------------------------------------
-    fig1 = plt.figure(figsize=(7.5, 4.2))
-    gs = fig1.add_gridspec(2, 3, hspace=0.35, wspace=0.35,
-                           height_ratios=[2, 0.9])
+    fig1, axes1 = plt.subplots(1, 3, figsize=(10.0, 1.5),
+                                gridspec_kw={'wspace': 0.35})
 
-    # Fila superior: histogramas con distribuciones
-    for i, res in enumerate(resultados_todos):
-        ax = fig1.add_subplot(gs[0, i])
-        
-        # Histograma
+    for i, (ax, res) in enumerate(zip(axes1, resultados_todos)):
         ax.hist(res["muestra0"], bins=15, density=True,
-                alpha=0.5, edgecolor='black', linewidth=0.5, 
+                alpha=0.5, edgecolor='black', linewidth=0.5,
                 color='lightgray')
 
         x = res["x_pdf"]
@@ -280,52 +275,28 @@ def main():
         if i == 0:
             ax.set_ylabel('Densidad')
         ax.grid(alpha=0.25, linewidth=0.5)
-        
-    # Fila inferior: intervalos de confianza iniciales
-    for i, res in enumerate(resultados_todos):
-        ax = fig1.add_subplot(gs[1, i])
-        
-        # IC con error bars más elegante
-        mid_point = (res["LI0"] + res["LS0"]) / 2
-        error = res["LS0"] - mid_point
-        
-        ax.errorbar([mid_point], [0.5], xerr=[[error]], 
-                   fmt='o', color='black', elinewidth=2, 
-                   capsize=5, capthick=2, markersize=4)
-        
-        ax.axvline(res["real_var"], color='red', linestyle='--', 
-                  linewidth=1.5)
-        
-        # Añadir etiqueta de varianza real solo en el centro
-       
-        
-        ax.set_ylim(0, 1)
-        ax.set_yticks([])
-        ax.set_xlabel('Varianza')
-        ax.grid(axis='x', alpha=0.25, linewidth=0.5)
-        
 
-    # Leyenda común para toda la figura 1
+    # Leyenda común
     from matplotlib.lines import Line2D
     legend_elements_fig1 = [
         Line2D([0], [0], color='lightgray', linewidth=6, label='Muestra'),
         Line2D([0], [0], color='k', linestyle='-', linewidth=1.5, label='Teórica'),
         Line2D([0], [0], color='k', linestyle='--', linewidth=1.5, label='Ajustada'),
     ]
-    fig1.legend(handles=legend_elements_fig1, loc='upper center', 
-               bbox_to_anchor=(0.5, 0.0), ncol=3, frameon=False, fontsize=8)
+    fig1.legend(handles=legend_elements_fig1, loc='upper center',
+                bbox_to_anchor=(0.5, -0.08), ncol=3, frameon=False, fontsize=8)
 
-    plt.savefig('INFORME/Imagenes/figura1_distribuciones.pdf', 
+    plt.savefig('INFORME/Imagenes/figura1_distribuciones.pdf',
                 dpi=300, bbox_inches='tight', pad_inches=0.05)
-    plt.savefig('INFORME/Imagenes/figura1_distribuciones.png', 
+    plt.savefig('INFORME/Imagenes/figura1_distribuciones.png',
                 dpi=300, bbox_inches='tight', pad_inches=0.05)
-    
-    plt.close(fig1)  # Cerrar figura 1 para liberar memoria
+
+    plt.close(fig1)
 
     # ---------------------------------------------
     # Figura 2: Intervalos de confianza (layout horizontal compacto)
     # ---------------------------------------------
-    fig2, axes2 = plt.subplots(1, 3, figsize=(7.5, 2.3), sharey=True)
+    fig2, axes2 = plt.subplots(1, 3, figsize=(7.5, 2), sharey=True)
 
     for ax, res in zip(axes2, resultados_todos):
         primeros = res["resultados"][:N_PLOT]
@@ -349,14 +320,7 @@ def main():
         ax.grid(axis='x', alpha=0.25, linewidth=0.5)
         ax.set_ylim(0, N_PLOT + 1)
         
-        # Texto con estadísticas - más compacto
-        ax.text(0.98, 0.98, 
-               f'{prop_cobertura:.1%}',
-               transform=ax.transAxes, fontsize=8, fontweight='bold',
-               verticalalignment='top', horizontalalignment='right',
-               bbox=dict(boxstyle='round,pad=0.3', 
-                        facecolor='white', edgecolor='gray', 
-                        linewidth=0.5, alpha=0.85))
+        
 
     axes2[0].set_ylabel('Índice de intervalo')
     
@@ -369,7 +333,7 @@ def main():
                label='$\\sigma^2$ real')
     ]
     fig2.legend(handles=legend_elements, loc='upper center', 
-               bbox_to_anchor=(0.5, -0.02), ncol=3, frameon=False, fontsize=8)
+               bbox_to_anchor=(0.5, 0.05), ncol=3, frameon=False, fontsize=8)
 
     plt.tight_layout()
     plt.savefig('INFORME/Imagenes/figura2_intervalos.pdf', 
