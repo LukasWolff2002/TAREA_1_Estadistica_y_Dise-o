@@ -103,7 +103,8 @@
 
     \vspace*{1cm}
 
-    \textbf{\Large Estudio de Distribuciones de Probabilidad: Análisis de Datos y Aplicaciones en Estadística}
+    \textbf{\Large Validez del Teorema de Cochran en la Estimación de la Varianza: 
+    Un Análisis Comparativo entre Distribuciones Normal, Exponencial y t de Student}
 
     \vspace{1cm}
 
@@ -132,12 +133,12 @@
     \vspace{1cm}
 
     \textit{Key words:} \textit{Cochran's Theorem, confidence intervals, variance 
-    estimation, Student's t distribution, PIV, heavy tails.}
+    estimation, Student's t distribution.}
 
 
 \section{Introducción}
 
-Una distribucion de probabilidad es un modelo matematico que describe como se reparte la incertidumbre asociada a una variable aleatoria. Estas distribuciones son fundamentales en estadistica, ya que permiten modelar y analizar datos, realizar inferencias y tomar decisiones informadas. En este informe, se exploraran diferentes distribuciones de probabilidad, sus propiedades y aplicaciones en el analisis de datos.
+Una distribucion de probabilidad es un modelo matematico que describe como se reparte la incertidumbre asociada a una variable aleatoria. Estas distribuciones son fundamentales en estadistica, ya que permiten modelar y analizar datos, realizar inferencias y tomar decisiones informadas. En este informe, se exploraran diferentes distribuciones de probabilidad, sus propiedades y aplicaciones en el analisis de datos \cite{fisher1922mathematical}.
 
 En términos aplicados, elegir una distribución equivale a postular una estructura para los datos: por ejemplo, la distribución Normal suele usarse cuando predominan efectos aditivos y simétricos; la Exponencial es natural para tiempos de espera y procesos de ocurrencia aleatoria; y la t de Student aparece de manera fundamental en inferencia sobre medias cuando la varianza poblacional es desconocida, especialmente en muestras pequeñas. Estas distribuciones no solo describen datos, sino que también determinan la forma de los estadísticos muestrales y, por tanto, la validez de intervalos de confianza, pruebas de hipótesis y métodos de estimación.
 
@@ -153,6 +154,34 @@ conclusiones sobre la importancia de elegir adecuadamente la distribución de
 probabilidad en el análisis estadístico.
 
 \section{Metodología}
+
+\subsection{Teorema de Cochran}
+
+El Teorema de Cochran \cite{cochran1934distribution} establece una propiedad fundamental de la distribución 
+Normal: si $X_1, X_2, \ldots, X_n \overset{\text{iid}}{\sim} \mathcal{N}(\mu, 
+\sigma^2)$, entonces la varianza muestral $S_n^2$ y la media muestral $\bar{X}$ 
+son estadísticos \textit{independientes}, y además:
+\begin{equation}
+    \frac{(n-1)S_n^2}{\sigma^2} \sim \chi^2_{n-1}
+\end{equation}
+
+Este resultado es \textit{exacto} bajo normalidad, y constituye la base teórica 
+para la construcción de intervalos de confianza para la varianza poblacional 
+$\sigma^2$. En particular, un intervalo al $95\%$ de confianza se obtiene a 
+partir de los cuantiles $\chi^2_{\alpha/2, n-1}$ y $\chi^2_{1-\alpha/2, n-1}$:
+\begin{equation}
+    \left[\frac{(n-1)S_n^2}{\chi^2_{1-\alpha/2,\, n-1}},\; 
+    \frac{(n-1)S_n^2}{\chi^2_{\alpha/2,\, n-1}}\right]
+\end{equation}
+
+La condición crítica del teorema es la normalidad de los datos. Si los 
+$X_i$ no provienen de una distribución Normal, la distribución exacta de 
+$(n-1)S_n^2/\sigma^2$ deja de ser $\chi^2_{n-1}$, y el intervalo de confianza 
+construido bajo ese supuesto puede resultar inválido. No obstante, el Teorema 
+Central del Límite garantiza que, para muestras suficientemente grandes, el 
+estadístico converge en distribución a $\chi^2_{n-1}$ incluso para 
+distribuciones no normales, siempre que estas posean momentos finitos de orden 
+suficiente y colas no demasiado pesadas.
 
 \subsection{Distribuciones de Probabilidad}
 
@@ -182,7 +211,7 @@ para $n$ suficientemente grande.
 
 \subsubsection{Distribución t de Student}
 
-La distribución t de Student surge al estimar la media de una población normal 
+La distribución t de Student  \cite{student1908probable} surge al estimar la media de una población normal 
 cuando la varianza poblacional es desconocida. Definida por sus grados de 
 libertad $\nu > 0$, su densidad es:
 \begin{equation}
@@ -211,43 +240,15 @@ ventana de interrogación, donde la varianza del ruido de medición es desconoci
 El estadístico $t$ permite construir intervalos de confianza sobre la velocidad 
 media local y determinar si las fluctuaciones observadas son estadísticamente 
 significativas o atribuibles al ruido instrumental, lo cual es crítico en flujos 
-de baja turbulencia.
+de baja turbulencia \cite{westerweel1997fundamentals, adrian2011particle}.
 
-Respecto al Teorema de Cochran, la t de Student \textbf{no satisface} sus 
+Respecto al Teorema de Cochran, la t de Student no satisface sus 
 condiciones: al no ser Normal, el estadístico $(n-1)S_n^2/\sigma^2$ no sigue 
 exactamente una distribución $\chi^2_{n-1}$. A diferencia de la Exponencial, 
 cuyas colas moderadas permiten que el Teorema Central del Límite compense esta 
 desviación con $n=100$, las colas pesadas de la t de Student ralentizan 
 significativamente dicha convergencia, produciendo intervalos de confianza 
 inválidos incluso para tamaños muestrales moderados.
-
-\subsection{Teorema de Cochran}
-
-El Teorema de Cochran establece una propiedad fundamental de la distribución 
-Normal: si $X_1, X_2, \ldots, X_n \overset{\text{iid}}{\sim} \mathcal{N}(\mu, 
-\sigma^2)$, entonces la varianza muestral $S_n^2$ y la media muestral $\bar{X}$ 
-son estadísticos \textit{independientes}, y además:
-\begin{equation}
-    \frac{(n-1)S_n^2}{\sigma^2} \sim \chi^2_{n-1}
-\end{equation}
-
-Este resultado es \textit{exacto} bajo normalidad, y constituye la base teórica 
-para la construcción de intervalos de confianza para la varianza poblacional 
-$\sigma^2$. En particular, un intervalo al $95\%$ de confianza se obtiene a 
-partir de los cuantiles $\chi^2_{\alpha/2, n-1}$ y $\chi^2_{1-\alpha/2, n-1}$:
-\begin{equation}
-    \left[\frac{(n-1)S_n^2}{\chi^2_{1-\alpha/2,\, n-1}},\; 
-    \frac{(n-1)S_n^2}{\chi^2_{\alpha/2,\, n-1}}\right]
-\end{equation}
-
-La condición crítica del teorema es la \textbf{normalidad de los datos}. Si los 
-$X_i$ no provienen de una distribución Normal, la distribución exacta de 
-$(n-1)S_n^2/\sigma^2$ deja de ser $\chi^2_{n-1}$, y el intervalo de confianza 
-construido bajo ese supuesto puede resultar inválido. No obstante, el Teorema 
-Central del Límite garantiza que, para muestras suficientemente grandes, el 
-estadístico converge en distribución a $\chi^2_{n-1}$ incluso para 
-distribuciones no normales, siempre que estas posean momentos finitos de orden 
-suficiente y colas no demasiado pesadas.
 
 \subsection{Generación de Datos Aleatorios}
 
@@ -300,21 +301,20 @@ su cota inferior. Los intervalos en azul cubren el valor real $\sigma^2$
     \vspace{-0.7cm}
     \caption{Intervalos de confianza al $95\%$ para $\sigma^2$ en 100 
     repeticiones. Azul: cubre $\sigma^2$ real (línea discontinua); rosado: 
-    no lo cubre. Cobertura en 1000 repeticiones: $95.5\%$ (Normal), 
-    $95.6\%$ (Exponencial) y $86.2\%$ (t de Student).}
+    no lo cubre. Cobertura en 100 repeticiones}
     \label{fig:intervalos}
 \end{figure}
 
 \textbf{Distribución Normal.} La cobertura fue de $955/1000$ ($95.5\%$), 
 en plena concordancia con el nivel nominal. El Teorema de Cochran 
-\textbf{se cumple exactamente}: bajo normalidad, $(n-1)S_n^2/\sigma^2 
+se cumple exactamente: bajo normalidad, $(n-1)S_n^2/\sigma^2 
 \sim \chi^2_{n-1}$ de forma exacta, independientemente de los valores 
 de $\mu$ y $\sigma$, por lo que el resultado no cambia al variar los 
 parámetros.
 
 \textbf{Distribución Exponencial ($\lambda = 0.5$).} La cobertura fue de 
 $956/1000$ ($95.6\%$), prácticamente idéntica al caso Normal. El Teorema 
-de Cochran \textbf{no aplica de forma exacta}, pero con $n=100$ el Teorema 
+de Cochran no aplica de forma exacta, pero con $n=100$ el Teorema 
 Central del Límite garantiza la convergencia suficiente de $S_n^2$, dado 
 que la Exponencial tiene colas moderadas (curtosis $= 6$, invariante en 
 $\lambda$). Por ello, la cobertura se mantiene estable independientemente 
@@ -322,14 +322,14 @@ del valor de $\lambda$.
 
 \textbf{Distribución t de Student.} La cobertura fue de $862/1000$ 
 ($86.2\%$), muy por debajo del $95\%$ nominal: el intervalo falla casi 
-el triple de las veces esperadas. El Teorema de Cochran \textbf{no se 
-cumple} con $n=100$. La causa son las colas pesadas de la t de Student, 
+el triple de las veces esperadas. El Teorema de Cochran no se 
+cumple con $n=100$. La causa son las colas pesadas de la t de Student, 
 cuya curtosis $\kappa = 6/(\nu-4)$ diverge para $\nu \to 4^+$, impidiendo 
-que $S_n^2$ converja a $\chi^2_{99}$ con rapidez suficiente. En 
+que $S_n^2$ converja a $\chi^2_{99}$ con rapidez suficiente \cite{lumley2002importance}. En 
 la Figura~\ref{fig:intervalos} esto se manifiesta como un sesgo sistemático: 
 los intervalos fallidos se concentran en los de menor amplitud, cuya cota 
-superior queda a la izquierda de $\sigma^2$. El resultado \textbf{sí cambia 
-con $\nu$}: a mayor $\nu$ las colas se alivian y la cobertura converge al 
+superior queda a la izquierda de $\sigma^2$. El resultado sí cambia 
+con $\nu$: a mayor $\nu$ las colas se alivian y la cobertura converge al 
 $95\%$; con $\nu$ cercano a $2$ el deterioro sería aún más severo.
 
 \section{Conclusión}
@@ -341,10 +341,17 @@ la cobertura ($95.6\%$) confirma que la aproximación $\chi^2$ es
 asintóticamente válida con $n=100$, gracias a sus colas moderadas. En 
 contraste, la t de Student evidencia que colas pesadas comprometen 
 severamente la validez del intervalo ($86.2\%$), incluso para muestras 
-de tamaño moderado. Esto subraya que la elección de la distribución no 
-es un detalle menor: aplicar el estadístico $\chi^2$ fuera de su dominio 
-de validez produce inferencias incorrectas cuya gravedad depende 
-críticamente del comportamiento de las colas de la distribución subyacente.
+de tamaño moderado.
+
+En cuanto a los supuestos, los resultados muestran que el más crítico es la 
+normalidad de los datos: el supuesto de que $n=100$ justifica la 
+aproximación asintótica resultó válido para la Exponencial, pero insuficiente 
+para la t de Student. Esto implica que, antes de aplicar el estadístico 
+$\chi^2$, es fundamental verificar que la distribución subyacente no presente 
+colas significativamente más pesadas que la Normal.
+
+\newpage
+\bibliography{referencias}
 
 
 \end{document}
