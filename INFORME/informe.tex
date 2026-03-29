@@ -1,0 +1,350 @@
+\documentclass[11pt]{article} 
+
+% Paquetes de idioma y codificación
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+
+% Paquete de geometría (una sola vez)
+\usepackage[
+  paperwidth=21.6cm,
+  paperheight=27.9cm,
+  left=3cm,
+  right=2cm,
+  top=3cm,
+  bottom=3cm
+]{geometry}
+
+% Paquetes de tipografía
+\usepackage{mathptmx}
+\usepackage{microtype}
+
+% Paquetes para manejo de colores y gráficos
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{tikz}
+
+% Definición de colores (ANTES de lstset que los usa)
+\definecolor{darkblue}{rgb}{0.0, 0.0, 0.55}
+\definecolor{codegreen}{rgb}{0.25, 0.49, 0.48}
+\definecolor{codegray}{rgb}{0.5, 0.5, 0.5}
+\definecolor{codepurple}{rgb}{0.58, 0, 0.82}
+\definecolor{backcolour}{rgb}{0.95, 0.95, 0.92}
+
+% Configuración de enlaces
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks = true,
+    linkcolor  = darkblue,
+    citecolor  = black,
+    filecolor  = blue,
+    urlcolor   = blue
+}
+
+% Paquetes para tablas y figuras
+\usepackage{booktabs}
+\usepackage{float}
+
+% Personalización de códigos fuente
+\usepackage{listings}
+\lstset{
+    literate=
+    {á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+    {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+    {ñ}{{\~n}}1 {Ñ}{{\~N}}1 {ü}{{\"u}}1 {Ü}{{\"U}}1,
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{codepurple},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{red},
+    basicstyle=\ttfamily\small,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2,
+    language=TeX,
+    morecomment=[l]\#,
+    frame=single,
+    rulecolor=\color{black}
+}
+
+% Matemáticas y párrafos
+\usepackage{amsmath}
+\usepackage{parskip}
+\usepackage{ragged2e}
+
+% Configuración de secciones (una sola definición de \part)
+\usepackage{titlesec}
+\titleformat{\part}[display]
+  {\normalfont\huge\bfseries}{}{0pt}{}
+  [\thispagestyle{fancy}]
+
+% Encabezados y pies de página
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+\fancyhead[R]{\thepage}
+
+% Bibliografía
+\usepackage{natbib}
+\bibliographystyle{unsrtnat}
+
+\begin{document}
+
+    \begin{center}
+
+    \vspace*{1cm}
+
+    \textbf{\Large Estudio de Distribuciones de Probabilidad: Análisis de Datos y Aplicaciones en Estadística}
+
+    \vspace{1cm}
+
+    \textbf{Lukas Wolff Casanova}\\
+    Facultad de Ingeniería y Ciencias Aplicadas, Universidad de los Andes, Santiago de Chile\\
+    e-mail: \href{mailto:lwolff@miuandes.cl}{lwolff@miuandes.cl}\\
+    GitHub: \href{https://github.com/LukasWolff2002/TAREA_1_Estadistica_y_Dise-o}{Repositorio}
+    \vspace{1cm}
+
+    \textbf{ABSTRACT}
+    \end{center}
+    \vspace{0.5cm}
+
+    This work analyzes the validity of Cochran's Theorem for variance estimation 
+    across three probability distributions: Normal, Exponential, and Student's t. 
+    Using samples of size $n=100$ and 1000 Monte Carlo repetitions, 95\% confidence 
+    intervals for the population variance were constructed via the $\chi^2$ statistic 
+    and their empirical coverage was evaluated. Results show that the Normal 
+    distribution achieves exact nominal coverage ($95.5\%$), consistent with 
+    Cochran's Theorem. The Exponential distribution ($95.6\%$) confirms asymptotic 
+    validity through the Central Limit Theorem. However, the Student's t distribution 
+    yields only $86.2\%$ coverage, revealing that heavy tails prevent convergence 
+    even at $n=100$. These findings highlight that the applicability of $\chi^2$-based 
+    inference depends critically on the tail behavior of the underlying distribution.
+
+    \vspace{1cm}
+
+    \textit{Key words:} \textit{Cochran's Theorem, confidence intervals, variance 
+    estimation, Student's t distribution, PIV, heavy tails.}
+
+
+\section{Introducción}
+
+Una distribucion de probabilidad es un modelo matematico que describe como se reparte la incertidumbre asociada a una variable aleatoria. Estas distribuciones son fundamentales en estadistica, ya que permiten modelar y analizar datos, realizar inferencias y tomar decisiones informadas. En este informe, se exploraran diferentes distribuciones de probabilidad, sus propiedades y aplicaciones en el analisis de datos.
+
+En términos aplicados, elegir una distribución equivale a postular una estructura para los datos: por ejemplo, la distribución Normal suele usarse cuando predominan efectos aditivos y simétricos; la Exponencial es natural para tiempos de espera y procesos de ocurrencia aleatoria; y la t de Student aparece de manera fundamental en inferencia sobre medias cuando la varianza poblacional es desconocida, especialmente en muestras pequeñas. Estas distribuciones no solo describen datos, sino que también determinan la forma de los estadísticos muestrales y, por tanto, la validez de intervalos de confianza, pruebas de hipótesis y métodos de estimación.
+
+El presente trabajo tiene como objetivo analizar y comparar diferentes distribuciones 
+de probabilidad, evaluando empíricamente la validez del Teorema de Cochran para la 
+estimación de la varianza poblacional mediante intervalos de confianza basados en el 
+estadístico $\chi^2$. En específico, se compararán las distribuciones Normal, 
+Exponencial a tasa $\lambda = 0.5$ y t de Student con $\nu = 5$ grados de libertad. 
+Además, se realizará un análisis descriptivo de la distribución t de Student, 
+explicando su comportamiento y aplicaciones en el análisis de datos. Finalmente, 
+se discutirán las implicancias de los resultados obtenidos y se presentarán 
+conclusiones sobre la importancia de elegir adecuadamente la distribución de 
+probabilidad en el análisis estadístico.
+
+\section{Metodología}
+
+\subsection{Distribuciones de Probabilidad}
+
+Las distribuciones de probabilidad permiten modelar la incertidumbre asociada a variables aleatorias, describiendo cómo se distribuyen sus valores posibles. En este trabajo se consideran distintas distribuciones con el objetivo de analizar sus propiedades y su impacto en la inferencia estadística, particularmente en la estimación de la varianza poblacional.
+
+\subsubsection{Distribución Normal}
+
+Completamente definida por $\mu$ y $\sigma^2$, su densidad es:
+\begin{equation}
+f(x) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{(x-\mu)^2}{2\sigma^2}\right)
+\end{equation}
+Es la única distribución para la cual el Teorema de Cochran aplica de forma exacta.
+
+\subsubsection{Distribución $\chi^2$}
+
+Surge como suma de cuadrados de variables normales estándar independientes. 
+Bajo normalidad, el estadístico $(n-1)S^2/\sigma^2 \sim \chi^2_{n-1}$ permite 
+construir intervalos de confianza exactos para $\sigma^2$, cuya validez fuera 
+de la normalidad es lo que se evalúa en este trabajo.
+
+\subsubsection{Distribución Exponencial}
+
+Modela tiempos de espera con tasa $\lambda > 0$, media $1/\lambda$ y varianza 
+$1/\lambda^2$. No cumple el Teorema de Cochran, pero su curtosis constante 
+igual a $6$ permite que la aproximación $\chi^2$ sea asintóticamente válida 
+para $n$ suficientemente grande.
+
+\subsubsection{Distribución t de Student}
+
+La distribución t de Student surge al estimar la media de una población normal 
+cuando la varianza poblacional es desconocida. Definida por sus grados de 
+libertad $\nu > 0$, su densidad es:
+\begin{equation}
+f(x) = \frac{\Gamma\!\left(\frac{\nu+1}{2}\right)}{\sqrt{\nu\pi}\,\Gamma\!\left(\frac{\nu}{2}\right)}
+\left(1+\frac{x^2}{\nu}\right)^{-\frac{\nu+1}{2}}
+\end{equation}
+
+Su varianza, definida para $\nu > 2$, se calcula como:
+\begin{equation}
+\operatorname{Var}(X) = \frac{\nu}{\nu - 2}
+\end{equation}
+
+lo que refleja que a mayor $\nu$, menor dispersión, convergiendo a $1$ cuando 
+$\nu \to \infty$, momento en que la distribución se aproxima a la Normal estándar. 
+Para $\nu > 4$, la curtosis es $\kappa = 6/(\nu-4)$, que diverge cuando 
+$\nu \to 4^+$, evidenciando el peso creciente de las colas para valores pequeños 
+de $\nu$.
+
+En el mundo real, la distribución t de Student tiene aplicaciones en cualquier 
+contexto donde se trabaje con muestras pequeñas y varianza desconocida: ensayos 
+clínicos, control de calidad industrial y, de particular relevancia en ingeniería 
+civil, en técnicas experimentales de análisis de fluidos como \textit{Particle 
+Image Velocimetry} (PIV) y \textit{Particle Tracking Velocimetry} (PTV). En estos 
+métodos se estiman campos de velocidad a partir de muestras reducidas en cada 
+ventana de interrogación, donde la varianza del ruido de medición es desconocida. 
+El estadístico $t$ permite construir intervalos de confianza sobre la velocidad 
+media local y determinar si las fluctuaciones observadas son estadísticamente 
+significativas o atribuibles al ruido instrumental, lo cual es crítico en flujos 
+de baja turbulencia.
+
+Respecto al Teorema de Cochran, la t de Student \textbf{no satisface} sus 
+condiciones: al no ser Normal, el estadístico $(n-1)S_n^2/\sigma^2$ no sigue 
+exactamente una distribución $\chi^2_{n-1}$. A diferencia de la Exponencial, 
+cuyas colas moderadas permiten que el Teorema Central del Límite compense esta 
+desviación con $n=100$, las colas pesadas de la t de Student ralentizan 
+significativamente dicha convergencia, produciendo intervalos de confianza 
+inválidos incluso para tamaños muestrales moderados.
+
+\subsection{Teorema de Cochran}
+
+El Teorema de Cochran establece una propiedad fundamental de la distribución 
+Normal: si $X_1, X_2, \ldots, X_n \overset{\text{iid}}{\sim} \mathcal{N}(\mu, 
+\sigma^2)$, entonces la varianza muestral $S_n^2$ y la media muestral $\bar{X}$ 
+son estadísticos \textit{independientes}, y además:
+\begin{equation}
+    \frac{(n-1)S_n^2}{\sigma^2} \sim \chi^2_{n-1}
+\end{equation}
+
+Este resultado es \textit{exacto} bajo normalidad, y constituye la base teórica 
+para la construcción de intervalos de confianza para la varianza poblacional 
+$\sigma^2$. En particular, un intervalo al $95\%$ de confianza se obtiene a 
+partir de los cuantiles $\chi^2_{\alpha/2, n-1}$ y $\chi^2_{1-\alpha/2, n-1}$:
+\begin{equation}
+    \left[\frac{(n-1)S_n^2}{\chi^2_{1-\alpha/2,\, n-1}},\; 
+    \frac{(n-1)S_n^2}{\chi^2_{\alpha/2,\, n-1}}\right]
+\end{equation}
+
+La condición crítica del teorema es la \textbf{normalidad de los datos}. Si los 
+$X_i$ no provienen de una distribución Normal, la distribución exacta de 
+$(n-1)S_n^2/\sigma^2$ deja de ser $\chi^2_{n-1}$, y el intervalo de confianza 
+construido bajo ese supuesto puede resultar inválido. No obstante, el Teorema 
+Central del Límite garantiza que, para muestras suficientemente grandes, el 
+estadístico converge en distribución a $\chi^2_{n-1}$ incluso para 
+distribuciones no normales, siempre que estas posean momentos finitos de orden 
+suficiente y colas no demasiado pesadas.
+
+\subsection{Generación de Datos Aleatorios}
+
+Para comparar las distribuciones $\chi^2$, exponencial a tasa $\lambda = 0.5$ y t de student, se genero una muestra aleatoria de 100 datos que distrbuyen normal con $\mu = 2$ y $\sigma = 2$ con la libreria de python \texttt{scipy.stats}. Posteriormente, se realizo el siguiente procedimiento con cada una de las distribuciones mencionadas, utilizando la muestra generada:
+
+(i) se calculo la varianza muestral ($S_n^2$) (ii) se determino un intervalo al 95\% de confianza para la varianza poblacional ($\sigma^2$) (iii) se realizaron 100 iteraciones del proceso anterior para obtener una distribucion de los intervalos de confianza y (iv) se realizaron otras 900 iteraciones para obtener un total de 1000 intervalos de confianza, con el fin de analizar la frecuencia con la que estos intervalos contienen el valor real de $\sigma^2$.
+
+Es importante mencionar que la muestra aleatoria se generó utilizando la semilla 200, 
+con el fin de garantizar la reproducibilidad de los resultados. Además, se asumen los 
+siguientes supuestos: (i) los $X_i$ son independientes e idénticamente distribuidos 
+(i.i.d.); (ii) la varianza poblacional $\sigma^2$ es finita, lo que impone la 
+restricción $\nu > 2$ para la t de Student; (iii) el estadístico 
+$(n-1)S_n^2/\sigma^2 \sim \chi^2_{n-1}$ se aplica de forma homogénea a las tres 
+distribuciones, asumiendo que $n=100$ es suficiente para que el Teorema Central del 
+Límite justifique la aproximación en los casos no normales; y (iv) el IC se construye 
+con dos colas simétricas en probabilidad ($\alpha/2$ en cada cola), utilizando los 
+cuantiles $\chi^2_{\alpha/2,\, n-1}$ y $\chi^2_{1-\alpha/2,\, n-1}$. 
+
+
+
+\section{Resultados y Análisis}
+
+La Figura~\ref{fig:distribuciones} muestra los histogramas de las muestras 
+generadas junto a sus densidades teórica y ajustada. En el caso Normal, 
+la muestra presenta un buen ajuste simétrico. La distribución Exponencial 
+exhibe la asimetría positiva característica, con cola derecha extendida. 
+La t de Student muestra una forma simétrica visualmente similar a la Normal, 
+pero con colas más pesadas que, si bien no resultan evidentes en el histograma, 
+tienen consecuencias significativas en la inferencia sobre la varianza.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{Imagenes/figura1_distribuciones.png}
+    \vspace{-0.7cm}
+    \caption{Histogramas de las muestras generadas con las densidades teórica 
+    y ajustada para las distribuciones Normal ($\mu=2,\,\sigma=2$), 
+    Exponencial ($\lambda=0.5$) y t de Student.}
+    \label{fig:distribuciones}
+\end{figure}
+
+
+La Figura~\ref{fig:intervalos} presenta los 100 intervalos de confianza al 
+$95\%$ construidos para cada distribución, ordenados de menor a mayor por 
+su cota inferior. Los intervalos en azul cubren el valor real $\sigma^2$ 
+(línea discontinua) y los rosados no.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{Imagenes/figura2_intervalos.png}
+    \vspace{-0.7cm}
+    \caption{Intervalos de confianza al $95\%$ para $\sigma^2$ en 100 
+    repeticiones. Azul: cubre $\sigma^2$ real (línea discontinua); rosado: 
+    no lo cubre. Cobertura en 1000 repeticiones: $95.5\%$ (Normal), 
+    $95.6\%$ (Exponencial) y $86.2\%$ (t de Student).}
+    \label{fig:intervalos}
+\end{figure}
+
+\textbf{Distribución Normal.} La cobertura fue de $955/1000$ ($95.5\%$), 
+en plena concordancia con el nivel nominal. El Teorema de Cochran 
+\textbf{se cumple exactamente}: bajo normalidad, $(n-1)S_n^2/\sigma^2 
+\sim \chi^2_{n-1}$ de forma exacta, independientemente de los valores 
+de $\mu$ y $\sigma$, por lo que el resultado no cambia al variar los 
+parámetros.
+
+\textbf{Distribución Exponencial ($\lambda = 0.5$).} La cobertura fue de 
+$956/1000$ ($95.6\%$), prácticamente idéntica al caso Normal. El Teorema 
+de Cochran \textbf{no aplica de forma exacta}, pero con $n=100$ el Teorema 
+Central del Límite garantiza la convergencia suficiente de $S_n^2$, dado 
+que la Exponencial tiene colas moderadas (curtosis $= 6$, invariante en 
+$\lambda$). Por ello, la cobertura se mantiene estable independientemente 
+del valor de $\lambda$.
+
+\textbf{Distribución t de Student.} La cobertura fue de $862/1000$ 
+($86.2\%$), muy por debajo del $95\%$ nominal: el intervalo falla casi 
+el triple de las veces esperadas. El Teorema de Cochran \textbf{no se 
+cumple} con $n=100$. La causa son las colas pesadas de la t de Student, 
+cuya curtosis $\kappa = 6/(\nu-4)$ diverge para $\nu \to 4^+$, impidiendo 
+que $S_n^2$ converja a $\chi^2_{99}$ con rapidez suficiente. En 
+la Figura~\ref{fig:intervalos} esto se manifiesta como un sesgo sistemático: 
+los intervalos fallidos se concentran en los de menor amplitud, cuya cota 
+superior queda a la izquierda de $\sigma^2$. El resultado \textbf{sí cambia 
+con $\nu$}: a mayor $\nu$ las colas se alivian y la cobertura converge al 
+$95\%$; con $\nu$ cercano a $2$ el deterioro sería aún más severo.
+
+\section{Conclusión}
+
+Los resultados obtenidos permiten concluir que el Teorema de Cochran se cumple 
+de forma exacta únicamente bajo normalidad, donde la cobertura empírica 
+($95.5\%$) coincide con el nivel nominal. Para la distribución Exponencial, 
+la cobertura ($95.6\%$) confirma que la aproximación $\chi^2$ es 
+asintóticamente válida con $n=100$, gracias a sus colas moderadas. En 
+contraste, la t de Student evidencia que colas pesadas comprometen 
+severamente la validez del intervalo ($86.2\%$), incluso para muestras 
+de tamaño moderado. Esto subraya que la elección de la distribución no 
+es un detalle menor: aplicar el estadístico $\chi^2$ fuera de su dominio 
+de validez produce inferencias incorrectas cuya gravedad depende 
+críticamente del comportamiento de las colas de la distribución subyacente.
+
+
+\end{document}
