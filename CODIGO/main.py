@@ -256,35 +256,83 @@ def main():
     })
 
     # ---------------------------------------------
-    # Figura 1: Distribuciones (solo histogramas)
+    # Figura 1: Distribuciones + ICs de varianza (2 filas)
     # ---------------------------------------------
-    fig1, axes1 = plt.subplots(1, 3, figsize=(10.0, 1.5),
-                                gridspec_kw={'wspace': 0.35})
+    from matplotlib.lines import Line2D
+    
+    fig1 = plt.figure(figsize=(7.5, 1.8))
+    gs = fig1.add_gridspec(2, 3, hspace=0.8, wspace=0.3, 
+                           height_ratios=[0.8, 0.5],
+                           top=0.92, bottom=0.08, left=0.08, right=0.98)
 
-    for i, (ax, res) in enumerate(zip(axes1, resultados_todos)):
+    # Primera fila: Histogramas
+    for i, res in enumerate(resultados_todos):
+        ax = fig1.add_subplot(gs[0, i])
+        
         ax.hist(res["muestra0"], bins=15, density=True,
-                alpha=0.5, edgecolor='black', linewidth=0.5,
-                color='lightgray')
+                alpha=0.6, edgecolor='black', linewidth=0.5,
+                color='lightgray', label='Muestra')
 
         x = res["x_pdf"]
-        ax.plot(x, res["pdf_teorica"](x), 'k-', linewidth=1.5)
-        ax.plot(x, res["pdf_ajustada"](x), 'k--', linewidth=1.5)
+        ax.plot(x, res["pdf_teorica"](x), 'k-', linewidth=1.2, label='Teórica')
+        #ax.plot(x, res["pdf_ajustada"](x), 'k--', linewidth=1.2, label='Ajustada')
 
-        ax.set_title(res['nombre'], fontweight='bold', pad=6)
-        ax.set_xlabel('$x$')
+        ax.set_title(res['nombre'], fontweight='bold', fontsize=10, pad=6)
+        ax.set_xlabel('$x$', fontsize=9)
         if i == 0:
-            ax.set_ylabel('Densidad')
+            ax.set_ylabel('Densidad', fontsize=9)
+        ax.tick_params(labelsize=8)
         ax.grid(alpha=0.25, linewidth=0.5)
+        
+        # Leyenda solo en el primer panel
+        if i == 0:
+            ax.legend(loc='upper right', fontsize=7, framealpha=0.9)
 
-    # Leyenda común
-    from matplotlib.lines import Line2D
-    legend_elements_fig1 = [
-        Line2D([0], [0], color='lightgray', linewidth=6, label='Muestra'),
-        Line2D([0], [0], color='k', linestyle='-', linewidth=1.5, label='Teórica'),
-        Line2D([0], [0], color='k', linestyle='--', linewidth=1.5, label='Ajustada'),
-    ]
-    fig1.legend(handles=legend_elements_fig1, loc='upper center',
-                bbox_to_anchor=(0.5, -0.08), ncol=3, frameon=False, fontsize=8)
+    # Segunda fila: Intervalos de confianza de la varianza
+    for i, res in enumerate(resultados_todos):
+        ax = fig1.add_subplot(gs[1, i])
+        
+        # Fondo sutil
+        ax.axhspan(0, 1, facecolor='#f0f0f0', alpha=0.3)
+        
+        # Línea vertical para la varianza real (primero para que quede atrás)
+        ax.axvline(res["real_var"], color='#d62728', linestyle='--', 
+                  linewidth=1.5, alpha=0.8, zorder=1)
+        
+        # Intervalo de confianza
+        ax.plot([res["LI0"], res["LS0"]], [0.5, 0.5], 
+               color='#1f77b4', linewidth=4, solid_capstyle='round', 
+               alpha=0.7, zorder=2)
+        
+        # Extremos del intervalo
+        ax.plot([res["LI0"], res["LS0"]], [0.5, 0.5], 'o', 
+               color='#1f77b4', markersize=5, zorder=3)
+        
+        # Varianza muestral S²
+        ax.plot(res["S20"], 0.5, 's', color='#ff7f0e', 
+               markersize=6, markeredgecolor='black', markeredgewidth=0.5,
+               zorder=4)
+        
+        ax.set_xlabel('Varianza', fontsize=9)
+        ax.set_ylim(0, 1)
+        ax.set_yticks([])
+        ax.tick_params(labelsize=8)
+        ax.grid(axis='x', alpha=0.25, linewidth=0.5)
+        ax.spines['left'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.spines['top'].set_visible(False)
+        
+        # Anotaciones con valores
+        y_text = 0.72
+        ax.text(res["LI0"], y_text, f'{res["LI0"]:.2f}', 
+               ha='center', va='bottom', fontsize=6.5, color='#1f77b4')
+        ax.text(res["LS0"], y_text, f'{res["LS0"]:.2f}', 
+               ha='center', va='bottom', fontsize=6.5, color='#1f77b4')
+        ax.text(res["real_var"], 0.25, f'$\\sigma^2={res["real_var"]:.2f}$', 
+                ha='center', va='top', fontsize=8, color='#d62728',
+                bbox=dict(boxstyle='round,pad=0.15', facecolor='white', 
+                        edgecolor='#d62728', alpha=1.0, linewidth=0.6))
+                
 
     plt.savefig('INFORME/Imagenes/figura1_distribuciones.pdf',
                 dpi=300, bbox_inches='tight', pad_inches=0.05)
@@ -333,14 +381,14 @@ def main():
                label='$\\sigma^2$ real')
     ]
     fig2.legend(handles=legend_elements, loc='upper center', 
-               bbox_to_anchor=(0.5, 0.05), ncol=3, frameon=False, fontsize=8)
+               bbox_to_anchor=(0.5, -0.08), ncol=3, frameon=False, fontsize=8)
 
     plt.tight_layout()
     plt.savefig('INFORME/Imagenes/figura2_intervalos.pdf', 
                 dpi=300, bbox_inches='tight', pad_inches=0.05)
     plt.savefig('INFORME/Imagenes/figura2_intervalos.png', 
                 dpi=300, bbox_inches='tight', pad_inches=0.05)
-    plt.close(fig2)  # Cerrar figura 2 para liberar memoria
+    plt.close(fig2)
 
 
 # =====================================================
